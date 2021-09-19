@@ -1,11 +1,24 @@
 
 import ReactDOM from 'react-dom';
+import { applyMiddleware, createStore } from 'redux';
+import thunk from 'redux-thunk';
+import { Provider } from "react-redux"
 import App from './App';
 import 'antd/dist/antd.css';
+import rootReducer from './store'
+import { BrowserRouter as Router } from "react-router-dom";
+
+
+
+const store = createStore(rootReducer, applyMiddleware(thunk))
 
 ReactDOM.render(
 
-  <App />
+  <Provider store={store}>
+    <Router>
+      <App />
+    </Router>
+  </Provider>
 
   , document.getElementById('root')
 );
