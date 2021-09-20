@@ -1,30 +1,42 @@
 import { Form, Input, Button, Result } from 'antd';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom'
+import { AppState } from "../store"
+import { login } from "../store/action/userActions"
+import { LoginForm } from "../types/user"
 import api from '../utils/api';
 import showError from '../utils/showError';
+import showSuccess from '../utils/showSuccess';
+
 
 
 const Login = () => {
     const history = useHistory();
     const location = useLocation<{ newSignUp?: boolean }>();
+    const dispatch = useDispatch();
 
+    const { data, loading, error } = useSelector((state: AppState) => state.user)
+    const onFinish = (values: LoginForm) => {
+        dispatch(login(values));
 
-    const onFinish = async (values: any) => {
-        console.log('Success:', values);
+    }
+    useEffect(() => {
+        error && showError(error);
+    }, [error]);
 
+    useEffect(() => {
+        data.username && showSuccess("You have successfully logged in!")
+    }, [data.username]);
 
-        try {
-            await api.post("/users/login", values);
-            history.push('/')
-        } catch (error) {
-            console.log({ error })
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            history.push("/")
         }
+    }, [data])
 
-    };
-    const onFinishFailed = (errorInfo: any) => {
-        console.log('Failed:', { errorInfo });
-        showError(errorInfo);
-    };
+
 
     return (
         <Form
@@ -33,7 +45,7 @@ const Login = () => {
             wrapperCol={{ span: 16 }}
             initialValues={{ remember: true }}
             onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
+            // onFinishFailed={onFinishFailed}
             autoComplete="off"
         >
             <h2 style={{ textAlign: "center", marginBottom: 40 }}>Please Login</h2>
@@ -46,12 +58,7 @@ const Login = () => {
                 />
             )}
 
-            {/* {location.state.newSignUp && (<Result
-                status="success"
-                title="You successfully signed up!"
-                subTitle="Please login using your credentials"
 
-            />)} */}
             <Form.Item
                 label="Username"
                 name="username"
